@@ -125,86 +125,109 @@ Yêu cầu trả về JSON chuẩn theo schema:
 - spoofReason: chuỗi mô tả nếu phát hiện gian lận màn hình.
 ${hint ? `Gợi ý nhận diện từ hệ thống: ${hint}` : ""}`;
 
-        const generatePromise = ai.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: {
-            parts: [
-              {
-                inlineData: {
-                  mimeType: mimeType,
-                  data: base64Data,
+        const candidateModels = ["gemini-3.6-flash", "gemini-3.8-flash"];
+        let response: any = null;
+        let lastErr: any = null;
+
+        for (const modelName of candidateModels) {
+          try {
+            const generatePromise = ai.models.generateContent({
+              model: modelName,
+              contents: {
+                parts: [
+                  {
+                    inlineData: {
+                      mimeType: mimeType,
+                      data: base64Data,
+                    },
+                  },
+                  { text: prompt },
+                ],
+              },
+              config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                  type: Type.OBJECT,
+                  properties: {
+                    category: {
+                      type: Type.STRING,
+                      description: "Chỉ chọn: organic, recyclable, hoặc inorganic",
+                    },
+                    itemName: {
+                      type: Type.STRING,
+                      description: "Tên vật thể rác tiếng Việt",
+                    },
+                    points: {
+                      type: Type.INTEGER,
+                      description: "1 cho organic, 2 cho recyclable, 3 cho inorganic",
+                    },
+                    confidence: {
+                      type: Type.NUMBER,
+                      description: "Độ tin cậy từ 0.70 đến 0.99",
+                    },
+                    description: {
+                      type: Type.STRING,
+                      description: "Mô tả chất liệu và tính chất",
+                    },
+                    binColor: {
+                      type: Type.STRING,
+                      description: "green, yellow, hoặc orange",
+                    },
+                    recyclingTip: {
+                      type: Type.STRING,
+                      description: "Lời khuyên bỏ rác chuẩn môi trường",
+                    },
+                    ecoImpact: {
+                      type: Type.STRING,
+                      description: "Tác động sinh thái tích cực",
+                    },
+                    isScreenOrPhotoSpoof: {
+                      type: Type.BOOLEAN,
+                      description: "True nếu người dùng chụp lại màn hình điện thoại hoặc ảnh 2D thay vì rác thật",
+                    },
+                    spoofReason: {
+                      type: Type.STRING,
+                      description: "Giải thích nếu phát hiện ảnh chụp từ màn hình",
+                    },
+                  },
+                  required: [
+                    "category",
+                    "itemName",
+                    "points",
+                    "confidence",
+                    "description",
+                    "binColor",
+                    "recyclingTip",
+                  ],
                 },
               },
-              { text: prompt },
-            ],
-          },
-          config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                category: {
-                  type: Type.STRING,
-                  description: "Chỉ chọn: organic, recyclable, hoặc inorganic",
-                },
-                itemName: {
-                  type: Type.STRING,
-                  description: "Tên vật thể rác tiếng Việt",
-                },
-                points: {
-                  type: Type.INTEGER,
-                  description: "1 cho organic, 2 cho recyclable, 3 cho inorganic",
-                },
-                confidence: {
-                  type: Type.NUMBER,
-                  description: "Độ tin cậy từ 0.70 đến 0.99",
-                },
-                description: {
-                  type: Type.STRING,
-                  description: "Mô tả chất liệu và tính chất",
-                },
-                binColor: {
-                  type: Type.STRING,
-                  description: "green, yellow, hoặc orange",
-                },
-                recyclingTip: {
-                  type: Type.STRING,
-                  description: "Lời khuyên bỏ rác chuẩn môi trường",
-                },
-                ecoImpact: {
-                  type: Type.STRING,
-                  description: "Tác động sinh thái tích cực",
-                },
-                isScreenOrPhotoSpoof: {
-                  type: Type.BOOLEAN,
-                  description: "True nếu người dùng chụp lại màn hình điện thoại hoặc ảnh 2D thay vì rác thật",
-                },
-                spoofReason: {
-                  type: Type.STRING,
-                  description: "Giải thích nếu phát hiện ảnh chụp từ màn hình",
-                },
-              },
-              required: [
-                "category",
-                "itemName",
-                "points",
-                "confidence",
-                "description",
-                "binColor",
-                "recyclingTip",
-              ],
-            },
-          },
-        });
+            });
 
-        // 4-second timeout to guarantee fast scanning on mobile devices
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Gemini Vision timeout after 4s")), 4000)
-        );
+            // 10-second timeout per model candidate
+            const timeoutPromise = new Promise((_, reject) =>
+              setTimeout(() => reject(new Error(`Gemini Vision timeout after 10s on ${modelName}`)), 10000)
+            );
 
-        const response: any = await Promise.race([generatePromise, timeoutPromise]);
+            response = await Promise.race([generatePromise, timeoutPromise]);
+            if (response?.text) {
+              break;
+            }
+          } catch (modelErr: any) {
+            lastErr = modelErr;
+            console.warn(`Gemini Vision ${modelName} failed (${modelErr?.message}), trying next candidate...`);
+          }
+        }
 
-        const rawText = response.text || "{}";
+        if (!response) {
+          throw lastErr || new Error("All Gemini Vision candidate models failed");
+        }
+
+        let rawText = (response.text || "{}").trim();
+        if (rawText.startsWith("```json")) {
+          rawText = rawText.replace(/^```json\s*/, "").replace(/\s*```$/, "");
+        } else if (rawText.startsWith("```")) {
+          rawText = rawText.replace(/^```\s*/, "").replace(/\s*```$/, "");
+        }
         const result = JSON.parse(rawText);
 
         // Ensure points align strictly with prompt rules

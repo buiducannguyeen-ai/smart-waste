@@ -4,7 +4,63 @@ const STORAGE_KEYS = {
   USER_PROFILE: 'ecosort_user_profile',
   LEADERBOARD: 'ecosort_leaderboard',
   HISTORY: 'ecosort_history',
+  REGISTERED_ACCOUNTS: 'ecosort_registered_accounts',
 };
+
+export interface SavedAccountItem {
+  email: string;
+  name: string;
+  organization?: string;
+  avatar?: string;
+  lastLogin: number;
+}
+
+export function loadSavedAccounts(): SavedAccountItem[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.REGISTERED_ACCOUNTS);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveRegisteredAccount(item: {
+  email: string;
+  name: string;
+  organization?: string;
+  avatar?: string;
+}) {
+  if (!item.email || !item.email.includes('@')) return;
+  try {
+    const existing = loadSavedAccounts();
+    const cleanEmail = item.email.trim().toLowerCase();
+    const filtered = existing.filter((a) => a.email.toLowerCase() !== cleanEmail);
+    const updated: SavedAccountItem[] = [
+      {
+        email: cleanEmail,
+        name: item.name.trim(),
+        organization: item.organization?.trim(),
+        avatar: item.avatar || '🌱',
+        lastLogin: Date.now(),
+      },
+      ...filtered,
+    ].slice(0, 15); // Lưu tối đa 15 tài khoản gần nhất
+    localStorage.setItem(STORAGE_KEYS.REGISTERED_ACCOUNTS, JSON.stringify(updated));
+  } catch (e) {
+    console.error('Failed to save account memory', e);
+  }
+}
+
+export function removeSavedAccount(emailToRemove: string) {
+  try {
+    const existing = loadSavedAccounts();
+    const cleanEmail = emailToRemove.trim().toLowerCase();
+    const updated = existing.filter((a) => a.email.toLowerCase() !== cleanEmail);
+    localStorage.setItem(STORAGE_KEYS.REGISTERED_ACCOUNTS, JSON.stringify(updated));
+  } catch (e) {}
+}
 
 export const DEFAULT_AVATARS = [
   '🌱', '🤖', '🦊', '🦉', '🐻‍❄️', '🚀', '♻️', '🌍', '🐢', '⚡'

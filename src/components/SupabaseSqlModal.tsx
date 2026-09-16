@@ -506,10 +506,10 @@ export const SupabaseSqlModal: React.FC<SupabaseSqlModalProps> = ({ isOpen, onCl
           <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
             <div className="flex items-center gap-1.5 font-bold text-slate-200">
               <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Bước 3: Đồng bộ Realtime</span>
+              <span>Bước 3: Tắt Confirm Email</span>
             </div>
             <p className="text-slate-400 text-[11px]">
-              RLS bảo vệ điểm số chống gian lận; Stored Procedure tự động tăng điểm và đồng bộ trực tiếp đa thiết bị.
+              Vào <strong>Authentication &gt; Providers &gt; Email</strong>, bỏ chọn <strong>"Confirm email"</strong> để tránh lỗi <em>email rate limit exceeded</em> khi thí sinh đăng ký hàng loạt.
             </p>
           </div>
         </div>

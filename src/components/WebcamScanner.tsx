@@ -11,8 +11,6 @@ import {
   Eye,
   SwitchCamera,
   ShieldAlert,
-  ShieldCheck,
-  ShieldOff,
   CheckCircle2,
   Trash2,
   HelpCircle,
@@ -22,7 +20,6 @@ import {
   Video,
   VideoOff,
   CameraOff,
-  Repeat
 } from 'lucide-react';
 import {
   WasteClassificationResult,
@@ -74,8 +71,8 @@ export const WebcamScanner: React.FC<WebcamScannerProps> = ({
   const [lastScannedImage, setLastScannedImage] = useState<string | null>(null);
   const [scanStatusText, setScanStatusText] = useState('CHỜ KÍCH HOẠT CAMERA');
 
-  // Anti-Cheat & Duplicate Prevention State (Default false to allow repeated scanning for points)
-  const [antiCheatEnabled, setAntiCheatEnabled] = useState(false);
+  // Anti-Cheat & Duplicate Prevention State (Khóa chống gian lận luôn kích hoạt cố định theo quy chế STEM)
+  const antiCheatEnabled = true;
   const [fingerprintRegistry, setFingerprintRegistry] = useState<ScannedFingerprintRecord[]>(() =>
     loadFingerprintRegistry()
   );
@@ -722,44 +719,6 @@ export const WebcamScanner: React.FC<WebcamScannerProps> = ({
             <span>Sổ Vân Tay ({fingerprintRegistry.length})</span>
           </button>
 
-          {/* Toggle Scan Mode: Free repeated scans vs Strict anti-cheat */}
-          <button
-            id="btn-toggle-anti-cheat"
-            onClick={() => {
-              playClickSound();
-              setAntiCheatEnabled(!antiCheatEnabled);
-            }}
-            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-black border-2 transition-all cursor-pointer shadow-md ${
-              !antiCheatEnabled
-                ? 'bg-gradient-to-r from-emerald-900/90 via-teal-900/90 to-cyan-900/90 border-emerald-400 text-emerald-200 shadow-emerald-500/30 ring-2 ring-emerald-400/50 hover:scale-105 active:scale-95'
-                : 'bg-gradient-to-r from-amber-950/90 via-rose-950/90 to-slate-900/90 border-amber-400 text-amber-200 shadow-amber-500/30 ring-2 ring-amber-400/50 hover:scale-105 active:scale-95'
-            }`}
-            title="Nhấn để chuyển đổi giữa Chế độ Cho phép quét lặp 1 ảnh nhiều lần lấy điểm hoặc Khóa chống gian lận"
-          >
-            {!antiCheatEnabled ? (
-              <>
-                <Repeat className="w-4 h-4 text-emerald-300 animate-spin-slow" />
-                <div className="flex flex-col text-left">
-                  <span className="text-[10px] uppercase text-emerald-400 font-extrabold tracking-wider leading-none">Chế Độ Quét</span>
-                  <span className="text-xs text-white font-black leading-tight">Quét Lặp Nhận Điểm: BẬT</span>
-                </div>
-                <span className="ml-1 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-mono font-bold">
-                  TỰ DO
-                </span>
-              </>
-            ) : (
-              <>
-                <ShieldCheck className="w-4 h-4 text-amber-400 animate-pulse" />
-                <div className="flex flex-col text-left">
-                  <span className="text-[10px] uppercase text-amber-400 font-extrabold tracking-wider leading-none">Chế Độ Quét</span>
-                  <span className="text-xs text-white font-black leading-tight">Khóa Chống Gian Lận: BẬT</span>
-                </div>
-                <span className="ml-1 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[10px] font-mono font-bold">
-                  STEM
-                </span>
-              </>
-            )}
-          </button>
 
           {/* Similarity Live Gauge if there is a previous sample */}
           {lastSimilarity > 0 && (

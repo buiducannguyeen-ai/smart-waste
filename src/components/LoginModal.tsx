@@ -13,10 +13,17 @@ import {
   LogOut,
   Database,
   AlertCircle,
-  Loader2
+  Loader2,
+  Trash2,
+  Users,
+  ChevronDown,
+  ChevronUp,
+  Settings,
+  Info,
+  ExternalLink
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { DEFAULT_AVATARS, getLevelTitle } from '../utils/storage';
+import { DEFAULT_AVATARS, getLevelTitle, loadSavedAccounts, saveRegisteredAccount, removeSavedAccount, SavedAccountItem } from '../utils/storage';
 import {
   isSupabaseConfigured,
   getSupabase,
@@ -51,9 +58,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [selectedAvatar, setSelectedAvatar] = useState('🌱');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [errorType, setErrorType] = useState<'invalid_cred' | 'email_not_confirmed' | 'missing_table' | 'other' | null>(null);
+  const [errorType, setErrorType] = useState<'invalid_cred' | 'email_not_confirmed' | 'email_rate_limit' | 'missing_table' | 'other' | null>(null);
+  const [showRateLimitGuide, setShowRateLimitGuide] = useState(true);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isSwitchingMode, setIsSwitchingMode] = useState(false);
+  const [savedAccounts, setSavedAccounts] = useState<SavedAccountItem[]>(() => loadSavedAccounts());
 
   const supabaseReady = isSupabaseConfigured();
 
@@ -110,6 +119,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       }
     }
 
+    if (profile.email && profile.email.includes('@')) {
+      saveRegisteredAccount({
+        email: profile.email,
+        name: profile.name,
+        organization: profile.organization,
+        avatar: profile.avatar,
+      });
+      setSavedAccounts(loadSavedAccounts());
+    }
+
     setTimeout(() => {
       setLoading(false);
       setSuccessMsg(`Chào mừng thí sinh ${profile.name}! Khởi tạo 0 điểm.`);
@@ -157,18 +176,32 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         setLoading(false);
 
         if (authErr) {
+          const lower = authErr.toLowerCase();
           if (authErr.includes('User already registered')) {
             setError('Email này đã được đăng ký trước đó! Vui lòng chuyển sang tab Đăng Nhập.');
             setErrorType('invalid_cred');
           } else if (authErr.includes('Password should be at least')) {
             setError('Mật khẩu cần có ít nhất 6 ký tự.');
+            setErrorType('other');
+          } else if (lower.includes('rate limit') || lower.includes('over_email_send_rate_limit')) {
+            setError('Máy chủ Supabase bị giới hạn số email gửi xác nhận (email rate limit exceeded: tối đa 3-4 mail/giờ). Hãy bấm nút "Vào chơi & Lưu điểm ngay" bên dưới để thi đấu, hoặc tắt "Confirm email" trong cài đặt Supabase!');
+            setErrorType('email_rate_limit');
+            setShowRateLimitGuide(true);
           } else {
             setError(authErr);
+            setErrorType('other');
           }
           return;
         }
 
         if (user) {
+          saveRegisteredAccount({
+            email: user.email,
+            name: user.name,
+            organization: user.organization,
+            avatar: user.avatar,
+          });
+          setSavedAccounts(loadSavedAccounts());
           setSuccessMsg('Đăng ký tài khoản thành công! Điểm khởi tạo: 0 điểm.');
           setTimeout(() => {
             onLogin(user);
@@ -179,12 +212,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         setLoading(false);
 
         if (authErr) {
-          if (authErr.toLowerCase().includes('invalid login credentials')) {
+          const lower = authErr.toLowerCase();
+          if (lower.includes('invalid login credentials')) {
             setError('Sai email hoặc mật khẩu! Nếu bạn chưa có tài khoản, vui lòng bấm "Đăng Ký Mới" hoặc dùng chế độ "Tham Gia Nhanh".');
             setErrorType('invalid_cred');
-          } else if (authErr.toLowerCase().includes('email not confirmed')) {
+          } else if (lower.includes('email not confirmed')) {
             setError('Tài khoản này chưa xác nhận email trên Supabase. Bạn có thể nhấn nút "Vào chơi ngay" bên dưới để thi đấu ngay lập tức!');
             setErrorType('email_not_confirmed');
+          } else if (lower.includes('rate limit') || lower.includes('over_email_send_rate_limit')) {
+            setError('Máy chủ Supabase bị giới hạn số email (email rate limit exceeded). Hãy bấm "Vào chơi & Lưu điểm ngay" bên dưới để tiếp tục!');
+            setErrorType('email_rate_limit');
+            setShowRateLimitGuide(true);
           } else if (authErr.includes('relation "public.players" does not exist')) {
             setError('Chưa tạo bảng "players" trên Supabase! Vui lòng bấm "Xem lệnh SQL" và dán vào SQL Editor của Supabase.');
             setErrorType('missing_table');
@@ -196,6 +234,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         }
 
         if (user) {
+          saveRegisteredAccount({
+            email: user.email,
+            name: user.name,
+            organization: user.organization,
+            avatar: user.avatar,
+          });
+          setSavedAccounts(loadSavedAccounts());
           setSuccessMsg(`Chào mừng trở lại, ${user.name}!`);
           setTimeout(() => {
             onLogin(user);
@@ -219,6 +264,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         createdAt: Date.now(),
       };
 
+      if (profile.email && profile.email.includes('@')) {
+        saveRegisteredAccount({
+          email: profile.email,
+          name: profile.name,
+          organization: profile.organization,
+          avatar: profile.avatar,
+        });
+        setSavedAccounts(loadSavedAccounts());
+      }
+
       setTimeout(() => {
         setLoading(false);
         setSuccessMsg(`Đã tạo thí sinh ${profile.name} (0 điểm) sẵn sàng lưu dữ liệu!`);
@@ -229,13 +284,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   };
 
-  // Bypass if email confirmation blocked user
-  const handleBypassEmailConfirm = () => {
+  // Bypass if email confirmation or rate limit blocked user
+  const handleBypassEmailConfirm = async () => {
     const fallbackName = username.trim() || email.split('@')[0] || 'Thí sinh STEM';
+    const safeEmail = email.trim() || `${fallbackName.toLowerCase().replace(/[^a-z0-9]/g, '')}_${Date.now()}@ecosort.stem`;
     const profile: UserProfile = {
       id: 'user-' + Date.now(),
       name: fallbackName,
-      email: email.trim(),
+      email: safeEmail,
       organization: organization.trim() || 'Khối Sáng Tạo STEM',
       avatar: selectedAvatar,
       totalPoints: 0,
@@ -245,7 +301,43 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       inorganicCount: 0,
       createdAt: Date.now(),
     };
-    onLogin(profile);
+
+    if (profile.email && profile.email.includes('@')) {
+      saveRegisteredAccount({
+        email: profile.email,
+        name: profile.name,
+        organization: profile.organization,
+        avatar: profile.avatar,
+      });
+      setSavedAccounts(loadSavedAccounts());
+    }
+
+    if (supabaseReady) {
+      try {
+        const client = getSupabase();
+        if (client) {
+          await client.from('players').upsert({
+            id: profile.id,
+            username: profile.name,
+            email: profile.email,
+            total_points: 0,
+            correct_count: 0,
+            organic_count: 0,
+            recyclable_count: 0,
+            inorganic_count: 0,
+            avatar: profile.avatar,
+            organization: profile.organization,
+          });
+        }
+      } catch (err) {
+        console.warn('Could not sync bypass profile to Supabase', err);
+      }
+    }
+
+    setSuccessMsg(`Chào mừng ${profile.name}! Đã kích hoạt chế độ thi đấu trực tiếp (0 điểm).`);
+    setTimeout(() => {
+      onLogin(profile);
+    }, 600);
   };
 
   const handleSignOut = async () => {
@@ -456,6 +548,61 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </button>
             </div>
 
+            {/* Danh sách các email / tài khoản đã đăng ký trong máy */}
+            {savedAccounts.length > 0 && (
+              <div className="mb-4 p-3 bg-slate-900/90 border border-slate-700/80 rounded-2xl shadow-inner">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-emerald-400" />
+                    Tài khoản đã đăng ký ({savedAccounts.length})
+                  </span>
+                  <span className="text-[10px] text-slate-400">Bấm để điền nhanh</span>
+                </div>
+                <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto pr-1">
+                  {savedAccounts.map((acc) => (
+                    <div
+                      key={acc.email}
+                      className="group flex items-center justify-between p-2 rounded-xl bg-slate-950/80 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 transition-all text-xs"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          playClickSound();
+                          setEmail(acc.email);
+                          if (acc.name) setUsername(acc.name);
+                          if (acc.organization) setOrganization(acc.organization);
+                          if (acc.avatar) setSelectedAvatar(acc.avatar);
+                          if (authMode === 'signup') setAuthMode('signin');
+                        }}
+                        className="flex-1 flex items-center gap-2 text-left cursor-pointer overflow-hidden"
+                      >
+                        <span className="text-base flex-shrink-0">{acc.avatar || '🌱'}</span>
+                        <div className="truncate min-w-0">
+                          <p className="font-semibold text-slate-200 group-hover:text-emerald-300 truncate">
+                            {acc.name || acc.email.split('@')[0]}
+                          </p>
+                          <p className="text-[10px] text-slate-400 truncate">{acc.email}</p>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        title="Xóa tài khoản khỏi máy này"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          playClickSound();
+                          removeSavedAccount(acc.email);
+                          setSavedAccounts(loadSavedAccounts());
+                        }}
+                        className="p-1 text-slate-500 hover:text-rose-400 transition-colors ml-2 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Error / Success alert with Actionable Resolution */}
             {error && (
               <div className="p-3 mb-4 rounded-xl bg-rose-950/70 border border-rose-500/60 text-rose-200 text-xs space-y-2">
@@ -509,6 +656,76 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   </div>
                 )}
 
+                {errorType === 'email_rate_limit' && (
+                  <div className="pt-2 border-t border-rose-900/60 space-y-2">
+                    <div className="flex flex-col gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          playClickSound();
+                          handleBypassEmailConfirm();
+                        }}
+                        className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
+                      >
+                        <Sparkles className="w-4 h-4 text-amber-300" />
+                        <span>Vào chơi & Lưu điểm ngay (Bỏ qua xác nhận mail)</span>
+                      </button>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            playClickSound();
+                            setShowRateLimitGuide(!showRateLimitGuide);
+                          }}
+                          className="flex-1 py-1.5 px-2.5 rounded-lg bg-slate-850 hover:bg-slate-800 text-slate-200 text-[11px] font-semibold transition-all border border-slate-700 flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          <Settings className="w-3.5 h-3.5 text-amber-400" />
+                          <span>{showRateLimitGuide ? 'Ẩn cách tắt giới hạn' : 'Cách tắt giới hạn vĩnh viễn (Khuyên dùng)'}</span>
+                          {showRateLimitGuide ? <ChevronUp className="w-3.5 h-3.5 ml-0.5" /> : <ChevronDown className="w-3.5 h-3.5 ml-0.5" />}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            playClickSound();
+                            setAuthMode('signin');
+                            setError(null);
+                            setErrorType(null);
+                          }}
+                          className="py-1.5 px-3 rounded-lg bg-slate-850 hover:bg-slate-800 text-cyan-300 text-[11px] font-semibold transition-all border border-slate-700 cursor-pointer"
+                        >
+                          Thử Đăng Nhập
+                        </button>
+                      </div>
+                    </div>
+
+                    {showRateLimitGuide && (
+                      <div className="p-3 rounded-xl bg-slate-900/95 border border-amber-500/40 text-slate-200 text-[11px] space-y-2 animate-in fade-in duration-150">
+                        <div className="flex items-center gap-1.5 font-bold text-amber-300">
+                          <Info className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                          <span>Tại sao bị lỗi "email rate limit exceeded"?</span>
+                        </div>
+                        <p className="text-slate-300 text-[11px] leading-relaxed">
+                          Gói miễn phí của Supabase mặc định chỉ cho phép gửi <strong>3-4 email/giờ</strong>. Khi nhiều người đăng ký, máy chủ gửi thư bị nghẽn và báo lỗi rate limit này.
+                        </p>
+                        <div className="p-2.5 rounded-lg bg-slate-950/90 border border-slate-800 space-y-1.5">
+                          <p className="font-bold text-emerald-400">Cách tắt chỉ trong 10 giây (Tài khoản kích hoạt tức thì):</p>
+                          <ol className="list-decimal list-inside space-y-1 text-slate-300 leading-normal">
+                            <li>Mở trang quản trị: <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer" className="text-teal-400 underline font-semibold inline-flex items-center gap-0.5">supabase.com/dashboard <ExternalLink className="w-2.5 h-2.5 inline" /></a></li>
+                            <li>Vào Dự án của bạn ➔ Chọn menu <strong>Authentication</strong> (ở thanh bên trái).</li>
+                            <li>Chọn mục <strong>Providers</strong> ➔ Nhấp vào dòng <strong>Email</strong>.</li>
+                            <li>Gạt tắt (Bỏ tích chọn) dòng <strong>"Confirm email"</strong> ➔ Nhấn <strong>Save</strong>.</li>
+                          </ol>
+                        </div>
+                        <p className="text-[10px] text-emerald-300/90 font-medium">
+                          ✨ Sau khi tắt mục này, thí sinh đăng ký là được kích hoạt ngay 100% không còn bị lỗi rate limit!
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {errorType === 'missing_table' && onOpenSqlGuide && (
                   <div className="pt-1 border-t border-rose-900/60">
                     <button
@@ -552,6 +769,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="VD: Nguyễn Văn A hoặc STEM Team 11"
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5 text-teal-400" />
+                      Email thí sinh (tùy chọn)
+                    </span>
+                    <span className="text-[10px] text-slate-400">Lưu vào bộ nhớ máy</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="thi-sinh@gmail.com"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all"
                   />
                 </div>
 

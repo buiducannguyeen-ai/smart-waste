@@ -196,65 +196,89 @@ QUY TẮC PHÊ DUYỆT (approved):
 
 Hãy phản hồi kết quả dưới dạng JSON theo đúng schema.`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: {
-          parts: [
-            {
-              inlineData: {
-                mimeType,
-                data: base64Data,
+      const candidateModels = ['gemini-3.6-flash', 'gemini-3.8-flash'];
+      let response: any = null;
+      let lastErr: any = null;
+
+      for (const modelName of candidateModels) {
+        try {
+          const generatePromise = ai.models.generateContent({
+            model: modelName,
+            contents: {
+              parts: [
+                {
+                  inlineData: {
+                    mimeType,
+                    data: base64Data,
+                  },
+                },
+                { text: prompt },
+              ],
+            },
+            config: {
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  approved: {
+                    type: Type.BOOLEAN,
+                    description: 'True nếu bài đăng hợp lệ cả về ảnh rác thật lẫn nội dung văn minh trên 15 từ',
+                  },
+                  imageCheckPassed: {
+                    type: Type.BOOLEAN,
+                    description: 'True nếu ảnh thực sự chụp rác thải hoặc ô nhiễm',
+                  },
+                  textCheckPassed: {
+                    type: Type.BOOLEAN,
+                    description: 'True nếu nội dung văn minh, chi tiết trên 15 từ và không spam',
+                  },
+                  isAIGenerated: {
+                    type: Type.BOOLEAN,
+                    description: 'True nếu phát hiện ảnh do AI tạo ra (Midjourney, DALL-E, Stable Diffusion, CGI, 3D render, ghép giả)',
+                  },
+                  aiAuthenticityPassed: {
+                    type: Type.BOOLEAN,
+                    description: 'True nếu là ảnh chụp quang học thực tế ngoài đời thực',
+                  },
+                  rejectionReason: {
+                    type: Type.STRING,
+                    description: 'Lý do cụ thể từ chối nếu không đạt (tiếng Việt)',
+                  },
+                  wasteTypeDetected: {
+                    type: Type.STRING,
+                    description: 'Loại rác nhận diện được trong ảnh (tiếng Việt)',
+                  },
+                  severityLevel: {
+                    type: Type.STRING,
+                    description: 'Mức độ nghiêm trọng: low, medium, high, hoặc urgent',
+                  },
+                  summary: {
+                    type: Type.STRING,
+                    description: 'Tóm tắt ngắn gọn tình trạng (1 câu tiếng Việt)',
+                  },
+                },
+                required: ['approved', 'imageCheckPassed', 'textCheckPassed', 'isAIGenerated'],
               },
             },
-            { text: prompt },
-          ],
-        },
-        config: {
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              approved: {
-                type: Type.BOOLEAN,
-                description: 'True nếu bài đăng hợp lệ cả về ảnh rác thật lẫn nội dung văn minh trên 15 từ',
-              },
-              imageCheckPassed: {
-                type: Type.BOOLEAN,
-                description: 'True nếu ảnh thực sự chụp rác thải hoặc ô nhiễm',
-              },
-              textCheckPassed: {
-                type: Type.BOOLEAN,
-                description: 'True nếu nội dung văn minh, chi tiết trên 15 từ và không spam',
-              },
-              isAIGenerated: {
-                type: Type.BOOLEAN,
-                description: 'True nếu phát hiện ảnh do AI tạo ra (Midjourney, DALL-E, Stable Diffusion, CGI, 3D render, ghép giả)',
-              },
-              aiAuthenticityPassed: {
-                type: Type.BOOLEAN,
-                description: 'True nếu là ảnh chụp quang học thực tế ngoài đời thực',
-              },
-              rejectionReason: {
-                type: Type.STRING,
-                description: 'Lý do cụ thể từ chối nếu không đạt (tiếng Việt)',
-              },
-              wasteTypeDetected: {
-                type: Type.STRING,
-                description: 'Loại rác nhận diện được trong ảnh (tiếng Việt)',
-              },
-              severityLevel: {
-                type: Type.STRING,
-                description: 'Mức độ nghiêm trọng: low, medium, high, hoặc urgent',
-              },
-              summary: {
-                type: Type.STRING,
-                description: 'Tóm tắt ngắn gọn tình trạng (1 câu tiếng Việt)',
-              },
-            },
-            required: ['approved', 'imageCheckPassed', 'textCheckPassed', 'isAIGenerated'],
-          },
-        },
-      });
+          });
+
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(`Gemini Moderation timeout after 10s on ${modelName}`)), 10000)
+          );
+
+          response = await Promise.race([generatePromise, timeoutPromise]);
+          if (response?.text) {
+            break;
+          }
+        } catch (modelErr: any) {
+          lastErr = modelErr;
+          console.warn(`Gemini Moderation ${modelName} failed (${modelErr?.message}), trying next candidate...`);
+        }
+      }
+
+      if (!response) {
+        throw lastErr || new Error('All Gemini moderation models failed');
+      }
 
       let rawText = (response.text || '{}').trim();
       if (rawText.startsWith('```json')) {
