@@ -53,6 +53,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [errorType, setErrorType] = useState<'invalid_cred' | 'email_not_confirmed' | 'missing_table' | 'other' | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [isSwitchingMode, setIsSwitchingMode] = useState(false);
 
   const supabaseReady = isSupabaseConfigured();
 
@@ -246,8 +247,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     };
     onLogin(profile);
   };
-
-  const [isSwitchingMode, setIsSwitchingMode] = useState(false);
 
   const handleSignOut = async () => {
     playClickSound();

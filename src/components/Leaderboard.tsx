@@ -30,6 +30,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
   currentUser,
   onRefreshOnline,
   onAddNewUser,
+  onOpenSqlGuide,
   onResetAllPoints,
   isLoading = false,
 }) => {
