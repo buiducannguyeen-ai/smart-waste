@@ -35,9 +35,9 @@ export const DuplicateWarningToast: React.FC<DuplicateWarningToastProps> = ({
           <div className="flex items-center gap-2">
             <span className="flex h-2.5 w-2.5 rounded-full bg-rose-500 animate-ping" />
             <span className="text-xs font-black tracking-wider uppercase text-rose-300 font-mono flex items-center gap-1.5">
-              <span>STEM AI ANTI-CHEAT</span>
+              <span>AI ANTI-CHEAT</span>
               <span className="text-rose-500">&bull;</span>
-              <span>CHỐNG GIAN LẬN QUÉT LẶP 1 ẢNH</span>
+              <span>CHỐNG GIAN LẬN QUÉT LẶP</span>
             </span>
           </div>
 

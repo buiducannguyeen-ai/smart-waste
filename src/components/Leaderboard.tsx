@@ -174,12 +174,12 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-black text-sm text-slate-100 tracking-tight flex items-center gap-1.5">
-                  <span>BẢNG XẾP HẠNG STEM</span>
+                  <span>BẢNG XẾP HẠNG</span>
                   <Flame className="w-4 h-4 text-amber-400 animate-pulse" />
                 </h3>
               </div>
               <p className="text-[11px] text-slate-400 font-medium">
-                Tự động đồng bộ nhiều thiết bị &bull; Điểm cao xếp trên
+                Điểm cao xếp trên &bull; Thời gian thực
               </p>
             </div>
           </div>
@@ -191,11 +191,11 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 playClickSound();
                 onAddNewUser();
               }}
-              title="Đăng ký hoặc đổi thí sinh"
+              title="Đăng ký hoặc đổi người dùng"
               className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 border-2 border-emerald-500/60 hover:border-emerald-400 text-emerald-300 hover:text-white font-black text-xs shadow-md shadow-emerald-950/50 hover:shadow-emerald-500/30 hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
               <UserPlus className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{currentUser ? 'Hồ Sơ' : 'Đăng Ký Thí Sinh'}</span>
+              <span>{currentUser ? 'Hồ Sơ' : 'Đăng Ký'}</span>
             </button>
 
             {onOpenSqlGuide && (
@@ -270,7 +270,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 </span>
               </div>
               <div className="text-[10px] text-slate-400 flex items-center gap-1.5 truncate mt-0.5">
-                <span className="truncate max-w-[120px]">{currentUser.organization || 'Thí sinh STEM'}</span>
+                <span className="truncate max-w-[120px]">{currentUser.organization || 'Thành viên'}</span>
                 <span>•</span>
                 <span className="flex-shrink-0">Đúng: <strong className="text-emerald-300">{currentUser.correctCount || 0} lần</strong></span>
               </div>
@@ -290,10 +290,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
               <Trophy className="w-6 h-6 text-slate-500" />
             </div>
             <p className="text-xs font-bold text-slate-300 mb-1">
-              Chưa có người chơi nào trên Bảng Xếp Hạng
+              Chưa có người chơi trên Bảng Xếp Hạng
             </p>
             <p className="text-[11px] text-slate-500 max-w-xs mx-auto mb-4">
-              Không sử dụng dữ liệu giả. Hãy bấm nút Đăng Ký Tài Khoản và quét rác qua Webcam để ghi tên vào bảng vàng!
+              Hãy đăng ký tài khoản và quét rác để ghi tên vào bảng xếp hạng!
             </p>
             <button
               onClick={() => {
@@ -303,7 +303,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all cursor-pointer"
             >
               <UserPlus className="w-3.5 h-3.5" />
-              <span>Đăng Ký Tài Khoản Ngay (0 điểm)</span>
+              <span>Đăng Ký Ngay</span>
             </button>
           </div>
         ) : (
@@ -346,7 +346,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                     )}
                   </div>
                   <div className="flex items-center gap-1.5 text-[10px] text-slate-400 truncate mt-0.5">
-                    <span className="truncate max-w-[120px]">{entry.organization || 'Thí sinh STEM'}</span>
+                    <span className="truncate max-w-[120px]">{entry.organization || 'Thành viên'}</span>
                     <span>•</span>
                     <span className="text-emerald-400 font-medium flex items-center gap-1 flex-shrink-0">
                       <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />

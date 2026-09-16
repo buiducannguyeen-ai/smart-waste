@@ -20,10 +20,10 @@ export const WasteGuideModal: React.FC<WasteGuideModalProps> = ({ isOpen, onClos
             </div>
             <div>
               <h2 className="text-lg font-extrabold text-slate-100 tracking-tight">
-                CẨM NANG PHÂN LOẠI RÁC & CƠ CHẾ TÍCH ĐIỂM STEM
+                CẨM NANG PHÂN LOẠI RÁC & TÍCH ĐIỂM
               </h2>
               <p className="text-xs text-slate-400">
-                Tiêu chuẩn khoa học môi trường áp dụng cho cuộc thi sáng tạo khoa học kỹ thuật
+                Hướng dẫn phân loại rác bảo vệ môi trường và quy định tích điểm
               </p>
             </div>
           </div>
@@ -183,16 +183,6 @@ export const WasteGuideModal: React.FC<WasteGuideModalProps> = ({ isOpen, onClos
               </div>
             </div>
           </div>
-
-          {/* STEM Project Badge */}
-          <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-center space-y-1">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Dự Án Nghiên Cứu Khoa Học &bull; Cuộc Thi Sáng Tạo STEM
-            </div>
-            <div className="text-sm font-extrabold text-cyan-400">
-              Ứng Dụng Thị Giác Máy Tính (Computer Vision) Trong Quản Lý Rác Thải Đô Thị Thông Minh
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
@@ -201,7 +191,7 @@ export const WasteGuideModal: React.FC<WasteGuideModalProps> = ({ isOpen, onClos
             onClick={onClose}
             className="px-5 py-2.5 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
           >
-            Đã Hiểu & Quay Lại Quét Rác
+            Đóng
           </button>
         </div>
       </div>

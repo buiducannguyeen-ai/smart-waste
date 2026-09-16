@@ -45,12 +45,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="font-black text-lg tracking-tight bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300 bg-clip-text text-transparent">
                   EcoSort AI
                 </span>
-                <span className="text-[10px] uppercase font-black tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 shadow-sm shadow-emerald-500/20">
-                  STEM 2026
-                </span>
               </div>
               <p className="text-xs text-slate-400 hidden lg:block font-medium">
-                Hệ Thống Phân Loại Rác Thông Minh & Phản Ánh Ô Nhiễm
+                Phân loại rác & phản ánh môi trường
               </p>
             </div>
           </div>
@@ -108,7 +105,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Leaf className="w-3.5 h-3.5" />
-              <span>Phân Loại Rác AI (STEM)</span>
+              <span>Phân Loại Rác AI</span>
             </button>
 
             <button
@@ -125,7 +122,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <AlertOctagon className="w-3.5 h-3.5 text-rose-400" />
-              <span>Phản Ánh Tình Trạng Rác</span>
+              <span>Phản Ánh Ô Nhiễm</span>
               <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-rose-500 text-white font-mono shadow-sm">
                 Mới
               </span>
@@ -145,7 +142,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {currentUser.name}
                 </div>
                 <div className="text-[10px] text-emerald-400 font-semibold">
-                  {currentUser.organization || 'Thí sinh STEM'}
+                  {currentUser.organization || 'Thành viên'}
                 </div>
               </div>
 
@@ -191,26 +188,26 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Quick Guide modal button */}
           <button
-            id="btn-open-stem-guide"
+            id="btn-open-guide"
             onClick={() => {
               playClickSound();
               onOpenGuide();
             }}
-            title="Cẩm nang phân loại rác STEM"
+            title="Cẩm nang phân loại rác"
             className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold bg-slate-900/90 hover:bg-emerald-950/60 text-emerald-300 hover:text-emerald-200 border-2 border-emerald-500/40 hover:border-emerald-400 shadow-md shadow-emerald-950/40 hover:shadow-emerald-500/20 active:scale-95 transition-all whitespace-nowrap"
           >
             <BookOpen className="w-4 h-4 text-emerald-400 animate-pulse" />
-            <span className="hidden lg:inline">Cẩm Nang STEM</span>
+            <span className="hidden lg:inline">Cẩm Nang</span>
           </button>
 
-          {/* Fullscreen for STEM Presentation */}
+          {/* Fullscreen for Presentation */}
           <button
             id="btn-toggle-fullscreen"
             onClick={() => {
               playClickSound();
               onToggleFullscreen();
             }}
-            title={isFullscreen ? 'Thoát toàn màn hình' : 'Chế độ Trình chiếu STEM (Phóng to máy chiếu)'}
+            title={isFullscreen ? 'Thoát toàn màn hình' : 'Chế độ Trình chiếu'}
             className={`flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-black border-2 transition-all shadow-md active:scale-95 whitespace-nowrap ${
               isFullscreen
                 ? 'bg-cyan-950 border-cyan-400 text-cyan-200 shadow-cyan-500/25 ring-2 ring-cyan-400/40'

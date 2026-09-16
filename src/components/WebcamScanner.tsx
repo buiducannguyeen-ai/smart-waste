@@ -284,14 +284,14 @@ export const WebcamScanner: React.FC<WebcamScannerProps> = ({
               result.data.spoofReason ||
               'Phát hiện bạn đang giơ một màn hình điện thoại hoặc bức ảnh 2D lên trước camera để gian lận tích điểm!',
             suggestedAction:
-              'Quy chế STEM: Yêu cầu đưa mẫu rác thật ngoài đời vào quét, nghiêm cấm quét ảnh chụp màn hình!',
+              'Yêu cầu đưa mẫu rác thật ngoài đời vào quét, nghiêm cấm quét ảnh chụp màn hình!',
             currentThumbnail: currentFingerprint?.thumbnail,
             isScreenSpoof: true,
           };
           if (onDuplicateDetected) {
             onDuplicateDetected(alertInfo);
           }
-          setScanStatusText('🚫 GIAN LẬN: PHÁT HIỆN ẢNH CHỤP MÀN HÌNH');
+          setScanStatusText('🚫 PHÁT HIỆN ẢNH MÀN HÌNH');
           return;
         }
 
@@ -637,7 +637,7 @@ export const WebcamScanner: React.FC<WebcamScannerProps> = ({
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs shadow-xl shadow-emerald-500/30 ring-4 ring-emerald-400/40 animate-pulse hover:animate-none hover:scale-105 active:scale-95 transition-all cursor-pointer"
           >
             <CheckCircle2 className="w-4 h-4 text-slate-950" />
-            <span>Xác Nhận Đã Bỏ Vào Thùng (Mở Khóa Quét)</span>
+            <span>Xác Nhận Đã Bỏ Thùng</span>
           </button>
         </div>
       )}
@@ -696,7 +696,7 @@ export const WebcamScanner: React.FC<WebcamScannerProps> = ({
               ) : (
                 <>
                   <Video className="w-5 h-5 text-slate-950" />
-                  <span>SỬ DỤNG CAMERA ĐỂ QUÉT</span>
+                  <span>BẬT CAMERA QUÉT</span>
                 </>
               )}
             </button>

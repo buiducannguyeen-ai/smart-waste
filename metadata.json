@@ -1,6 +1,6 @@
 {
   "name": "Remix EcoSort AI - Phân Loại Rác Tích Điểm",
-  "description": "Hệ thống AI nhận diện và phân loại rác thông minh tích điểm, bảng xếp hạng và giao diện trình chiếu STEM.",
+  "description": "Hệ thống AI nhận diện và phân loại rác thông minh tích điểm, bảng xếp hạng và giao diện trình chiếu.",
   "requestFramePermissions": [
     "camera"
   ],

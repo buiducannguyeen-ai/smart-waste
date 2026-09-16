@@ -54,7 +54,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-  const [organization, setOrganization] = useState('Lớp 11A1 - CLB STEM');
+  const [organization, setOrganization] = useState('Đội Xanh');
   const [selectedAvatar, setSelectedAvatar] = useState('🌱');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,19 +77,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     playClickSound();
 
     if (!username.trim()) {
-      setError('Vui lòng nhập tên thí sinh hoặc đội thi.');
+      setError('Vui lòng nhập tên thành viên hoặc nhóm.');
       return;
     }
 
     setLoading(true);
     const sanitizedName = username.trim();
-    const safeEmail = email.trim() || `${sanitizedName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'player'}_${Date.now()}@ecosort.stem`;
+    const safeEmail = email.trim() || `${sanitizedName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'player'}_${Date.now()}@ecosort.vn`;
 
     const profile: UserProfile = {
       id: 'user-' + Date.now(),
       name: sanitizedName,
       email: safeEmail,
-      organization: organization.trim() || 'Khối Sáng Tạo STEM',
+      organization: organization.trim() || 'Cộng Đồng Xanh',
       avatar: selectedAvatar,
       totalPoints: 0,
       correctCount: 0,
