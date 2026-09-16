@@ -6,8 +6,9 @@ import { getLevelTitle } from '../utils/storage';
 const metaEnv = (import.meta as unknown as { env?: Record<string, string> }).env || {};
 
 // Supabase URL & Anon Key default to empty so old project credentials are completely purged
-export const DEFAULT_SUPABASE_URL = '';
-export const DEFAULT_SUPABASE_ANON_KEY = '';
+export const DEFAULT_SUPABASE_URL = 'https://cuxalsutwmzowwhdrjrq.supabase.co';
+export const DEFAULT_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1eGFsc3V0d216b3d3aGRyanJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1Mzk4MDQsImV4cCI6MjEwNTExNTgwNH0.NwNnkBZs_aYCV0MWpP2ZGotM5UuM2C9RH4rMVQPLf-M';
 
 export function getEffectiveSupabaseConfig() {
   // Purge any legacy cached keys from old project qzoxbcsxnjzdsodfxhfl

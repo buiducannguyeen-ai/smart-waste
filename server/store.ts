@@ -69,8 +69,16 @@ interface StoreData {
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'stem_data.json');
 
-const SUPABASE_URL = (process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '').trim();
-const SUPABASE_ANON_KEY = (process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '').trim();
+const SUPABASE_URL = (
+  process.env.VITE_SUPABASE_URL ||
+  process.env.SUPABASE_URL ||
+  'https://cuxalsutwmzowwhdrjrq.supabase.co'
+).trim();
+const SUPABASE_ANON_KEY = (
+  process.env.VITE_SUPABASE_ANON_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1eGFsc3V0d216b3d3aGRyanJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1Mzk4MDQsImV4cCI6MjEwNTExNTgwNH0.NwNnkBZs_aYCV0MWpP2ZGotM5UuM2C9RH4rMVQPLf-M'
+).trim();
 
 function getSupabaseServerClient() {
   if (
